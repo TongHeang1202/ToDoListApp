@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ToDoListApp",
-    "slug": "ToDoListApp",
+    "slug": "todo-list-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,6 +25,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "04b8972e-b479-4a50-b4ff-6f37aa88ceee"
+      }
+    },
+    "owner": "heangtong"
   }
 }
