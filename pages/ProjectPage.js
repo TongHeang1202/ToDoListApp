@@ -1,8 +1,9 @@
 import React from 'react';
-import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView} from 'react-native';
+import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight, TouchableOpacity} from 'react-native';
 
 
 export default function ProjectPage({projectId}) {
+    const [addTaskName, onChangeAddTaskName] = React.useState('')
     const projectName = 'Homework'
 
     const taskList = [
@@ -36,12 +37,27 @@ export default function ProjectPage({projectId}) {
             );
         }
     }
-    
+
+    const addTask = () => {
+
+    }   
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
-
                 <Text style={styles.title}>{projectName}</Text>
+
+                <TextInput 
+                    onChange={onChangeAddTaskName}
+                    style={styles.input}
+                    placeholder='Task Name'
+                    value={addTaskName}
+                />
+                <TouchableOpacity style={styles.buttonContainer} onPress={addTask}>
+                    <View >
+                        <Text style={styles.buttonText}>Add Task</Text>
+                    </View>
+                </TouchableOpacity>
                 
                 <View style={styles.listContainer}>
                     <Text style={styles.title}>Tasks</Text>
@@ -117,13 +133,18 @@ const styles = StyleSheet.create({
     },
   
     buttonContainer: {
-      width: 300,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+        width: 150,
+        height: 30,
+        margin: 12,
+        padding: 20,
+      backgroundColor: '#fff',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 10,
     },
   
-    button: {
-      backgroundColor: '#fff',
+    buttonText: {
+      fontSize: 20,
     },
 
     icon: {

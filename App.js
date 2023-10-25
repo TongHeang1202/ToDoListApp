@@ -6,15 +6,19 @@ import RegisterPage from './pages/RegisterPage';
 import Overview from './pages/Overview';
 import ProjectPage from './pages/ProjectPage';
 import ProfilePage from './pages/ProfilePage';
-import PersonalCreate from './pages/PersonalCreate';
+import PersonalAdd from './pages/PersonalAdd';
+import TeamPage from './pages/TeamPage';
+import MembersPage from './pages/MembersPage';
 
 export default function App() {
   return (
     // <LoginPage />
     // <RegisterPage />
     // <Overview />
-    // <ProjectPage />
+    <ProjectPage />
     // <ProfilePage />
-    <PersonalCreate />
+    // <PersonalAdd />
+    // <TeamPage />
+    // <MembersPage />
   );
 }

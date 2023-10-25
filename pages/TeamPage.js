@@ -1,33 +1,50 @@
 import React from 'react';
-import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight} from 'react-native';
+import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight, TouchableOpacity} from 'react-native';
 
 
-export default function PersonalCreate() {
+export default function TeamPage() {
+    let projectList = [
+        {name: 'wake up', size: 10},
+        {name: 'shower', size: 10},
+        {name: 'sleep', size: 10}
+    ]
 
-    const [isCreateProject, setisCreateProject] = React.useState(true)
+    let projects = []
+    for (let i=0; i<projectList.length; i++){
+        projects.push(
+            <TouchableOpacity onPress={goToProject}>
+                <View style={styles.item}>
+                    <Text style={styles.itemText}>
+                        {projectList[i].name}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        );
+    }
 
+    
+    const goToProject = () => {
+
+    }
+    
     const changePage = () => {
 
     }
 
+
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.mainView}>
-                <View style={styles.createOptionContainer}>
-                    <TouchableHighlight onPress={() => setisCreateProject(true)}>
-                        <View>
-                            <Text style={styles.title}>Create Project</Text>
+            <ScrollView style={styles.mainView}>
+                <View>
+                    <View style={styles.listContainer}>
+                        <Text style={styles.title}>Projects</Text>
+                        <View style={styles.itemContainer}>
+                            {projects}
                         </View>
-                    </TouchableHighlight>
+                    </View>
 
-                    <TouchableHighlight onPress={() => setisCreateProject(false)}>
-                        <View>
-                            <Text style={styles.title}>Create Team</Text>
-                        </View>
-                    </TouchableHighlight>
                 </View>
-
-            </View>
+            </ScrollView>
 
 
 
@@ -39,14 +56,14 @@ export default function PersonalCreate() {
                         <Image style={styles.icon} source={require('../assets/list.png')} />
                     </View>
                 </TouchableHighlight>
-                
-                
+
+
                 <TouchableHighlight onPress={changePage}>
                     <View style={styles.footerItem}>
                         <Image style={styles.icon} source={require('../assets/plus.png')} />
                     </View>
                 </TouchableHighlight>
-                
+
 
                 <TouchableHighlight onPress={changePage}>
                     <View style={styles.footerItem}>
@@ -66,17 +83,14 @@ export default function PersonalCreate() {
       backgroundColor: '#222',
       alignItems: 'center',
       justifyContent: 'space-between',
+      overflow: 'scroll',
     },
   
     title: {
       margin: 20,
       color: "#fff",
-      fontSize: 25,
+      fontSize: 30,
       fontWeight: 'bold',
-    },
-
-    createOptionContainer: {
-        flexDirection: 'row',
     },
 
     listContainer: {
@@ -115,29 +129,24 @@ export default function PersonalCreate() {
       borderWidth: 1,
       borderRadius: 25,
     },
+  
+    buttonContainer: {
+      width: 300,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+  
+    button: {
+      backgroundColor: '#fff',
+    },
 
     icon: {
         width: 50,
         height: 50,
     },
 
-    profilePic: {
-        width: 100,
-        height: 100,
-        margin: 30,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'white',
-        borderRadius: 50,
-    },
-
     mainView: {
-        alignItems: 'center',
-    },
-
-    logoutButton: {
-        backgroundColor: 'tomato',
-        borderRadius: 25,
+        flex: 1,
     },
 
     footer: {
