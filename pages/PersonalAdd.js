@@ -2,13 +2,17 @@ import React from 'react';
 import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight} from 'react-native';
 import AddProjectForm from '../components/AddProjectForm';
 import AddTeamForm from '../components/AddTeamForm';
+import supabase from '../supabase'
 
-export default function PersonalAdd() {
+export default PersonalAdd = props => {
+    const [currentPage, setCurrentPage] = props.function;
+    const userId = props.userId
+    const teamId = props.teamId
 
     const [isCreateProject, setisCreateProject] = React.useState(true)
 
-    const changePage = () => {
-
+    const changePage = (e) => {
+        setCurrentPage(e)
     }
 
     return (
@@ -28,8 +32,8 @@ export default function PersonalAdd() {
                     </TouchableHighlight>
                 </View>
 
-                {isCreateProject && <AddProjectForm />}
-                {!isCreateProject && <AddTeamForm />}
+                {isCreateProject && <AddProjectForm userId={userId} teamId={teamId} />}
+                {!isCreateProject && <AddTeamForm userId={userId} />}
 
             </View>
 
@@ -38,21 +42,21 @@ export default function PersonalAdd() {
             {/* footer */}
             <View style={styles.footer}>
 
-                <TouchableHighlight onPress={changePage}>
+                <TouchableHighlight onPress={() => changePage('Overview')}>
                     <View style={styles.footerItem}>
                         <Image style={styles.icon} source={require('../assets/list.png')} />
                     </View>
                 </TouchableHighlight>
-                
-                
-                <TouchableHighlight onPress={changePage}>
+
+
+                <TouchableHighlight onPress={() => changePage('PersonalAdd')}>
                     <View style={styles.footerItem}>
                         <Image style={styles.icon} source={require('../assets/plus.png')} />
                     </View>
                 </TouchableHighlight>
-                
 
-                <TouchableHighlight onPress={changePage}>
+
+                <TouchableHighlight onPress={() => changePage('ProfilePage')}>
                     <View style={styles.footerItem}>
                         <Image style={styles.icon} source={require('../assets/user.png')} />
                     </View>

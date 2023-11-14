@@ -1,18 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight, TouchableOpacity} from 'react-native';
+import supabase from '../supabase'
 
+export default TeamPage = props => {
+    const [currentPage, setCurrentPage] = props.function;
+    const [projectId, setProjectID] = props.projFunc;
+    const [teamId, setTeamID] = props.teamFunc;
 
-export default function TeamPage() {
-    let projectList = [
-        {name: 'wake up', size: 10},
-        {name: 'shower', size: 10},
-        {name: 'sleep', size: 10}
-    ]
+    const [projectList, setProjectList] = React.useState([])
+    useEffect(() => {
+        const fetchProjects = async () => {
+            let { data: projects, error } = await supabase
+            .from('projects')
+            .select()
+            .eq('team_id', teamId)
+            
+            if (projects) setProjectList(projects)
+        }
+        fetchProjects()
+    }, [])
 
     let projects = []
     for (let i=0; i<projectList.length; i++){
         projects.push(
-            <TouchableOpacity onPress={goToProject}>
+            <TouchableOpacity key={projectList[i].id} onPress={() => goToProject(projectList[i].id)}>
                 <View style={styles.item}>
                     <Text style={styles.itemText}>
                         {projectList[i].name}
@@ -23,18 +34,31 @@ export default function TeamPage() {
     }
 
     
-    const goToProject = () => {
-
+    const goToProject = (e) => {
+        setProjectID(e)
+        changePage('ProjectPage')
     }
     
-    const changePage = () => {
+    const changePage = (e) => {
+        setCurrentPage(e)
+    }
 
+    const leavePage = () => {
+        setTeamID(-1)
+        setCurrentPage('Overview')
     }
 
 
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView style={styles.mainView}>
+                
+                <TouchableHighlight style={styles.buttonContainer} onPress={() => leavePage()}>
+                    <View>
+                        <Text style={styles.buttonText}>Go Back</Text>
+                    </View>
+                </TouchableHighlight>
+
                 <View>
                     <View style={styles.listContainer}>
                         <Text style={styles.title}>Projects</Text>
@@ -51,23 +75,23 @@ export default function TeamPage() {
             {/* footer */}
             <View style={styles.footer}>
 
-                <TouchableHighlight onPress={changePage}>
+                <TouchableHighlight onPress={() => changePage('TeamPage')}>
                     <View style={styles.footerItem}>
-                        <Image style={styles.icon} source={require('../assets/list.png')} />
+                        <Image style={styles.icon} source={require('../assets/file.png')} />
                     </View>
                 </TouchableHighlight>
 
 
-                <TouchableHighlight onPress={changePage}>
+                <TouchableHighlight onPress={() => changePage('TeamAdd')}>
                     <View style={styles.footerItem}>
-                        <Image style={styles.icon} source={require('../assets/plus.png')} />
+                        <Image style={styles.icon} source={require('../assets/warning-sign.png')} />
                     </View>
                 </TouchableHighlight>
 
 
-                <TouchableHighlight onPress={changePage}>
+                <TouchableHighlight onPress={() => changePage('MembersPage')}>
                     <View style={styles.footerItem}>
-                        <Image style={styles.icon} source={require('../assets/user.png')} />
+                        <Image style={styles.icon} source={require('../assets/group.png')} />
                     </View>
                 </TouchableHighlight>
 
@@ -131,13 +155,19 @@ export default function TeamPage() {
     },
   
     buttonContainer: {
-      width: 300,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+        width: 200,
+        height: 40,
+        margin: 12,
+        padding: 10,
+      backgroundColor: 'white',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 10,
     },
   
-    button: {
-      backgroundColor: '#fff',
+    buttonText: {
+      fontSize: 20,
+      color: '#222',
     },
 
     icon: {

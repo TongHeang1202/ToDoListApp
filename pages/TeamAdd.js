@@ -1,48 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight} from 'react-native';
+import AddProjectForm from '../components/AddProjectForm';
 import supabase from '../supabase'
 
-export default ProfilePage = props => {
+export default PersonalAdd = props => {
     const [currentPage, setCurrentPage] = props.function;
-    const [isLoggedIn, setIsLoggedIn] = props.logoutFunc;
-    const [userId, setUserID] = props.userFunc;
+    const userId = props.userId
+    const teamId = props.teamId
 
-    
-    const [user, setUser] = React.useState([])
-    const [userSuccess, setUserSuccess] = React.useState(null)
-    useEffect(() => {
-        const fetchData = async () => {
-            let { data: users, errorProj } = await supabase
-            .from('users')
-            .select('first_name, email, last_name, phone')
-            .eq('id', userId)
-            
-            if (users){
-                setUser(users)
-                setUserSuccess(true)
-            } 
-        }
-        fetchData()
-    }, [])
-
-    let fname = ''
-    let lname = ''
-    let email = ''
-    let phone = ''
-
-    if (userSuccess){
-        fname = user[0].first_name
-        lname = user[0].last_name
-        email = user[0].email
-        phone = user[0].phone
-    }
-
-
-    const logout = () => {
-        setUserID(0)
-        setIsLoggedIn(false)
-        setCurrentPage('LoginPage')
-    }
+    const [isCreateProject, setisCreateProject] = React.useState(true)
 
     const changePage = (e) => {
         setCurrentPage(e)
@@ -51,18 +17,17 @@ export default ProfilePage = props => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.mainView}>
+                <View style={styles.createOptionContainer}>
+                    <TouchableHighlight onPress={() => setisCreateProject(true)}>
+                        <View>
+                            <Text style={styles.title}>Create Project</Text>
+                        </View>
+                    </TouchableHighlight>
 
-                <View style={styles.profilePic}>
-                    <Image source={require('../assets/favicon.png')}/>
                 </View>
-                
-                <Text style={styles.title}>{fname} {lname}</Text>
-                <Text style={styles.title}>{email}</Text>
-                <Text style={styles.title}>{phone}</Text>
 
-                <TouchableHighlight onPress={() => logout()}>
-                    <View style={styles.logoutButton}><Text style={styles.title}>Logout</Text></View>
-                </TouchableHighlight>
+                <AddProjectForm userId={userId} teamId={teamId} />
+
             </View>
 
 
@@ -70,23 +35,23 @@ export default ProfilePage = props => {
             {/* footer */}
             <View style={styles.footer}>
 
-                <TouchableHighlight onPress={() => changePage('Overview')}>
+                <TouchableHighlight onPress={() => changePage('TeamPage')}>
                     <View style={styles.footerItem}>
-                        <Image style={styles.icon} source={require('../assets/list.png')} />
+                        <Image style={styles.icon} source={require('../assets/file.png')} />
                     </View>
                 </TouchableHighlight>
 
 
-                <TouchableHighlight onPress={() => changePage('PersonalAdd')}>
+                <TouchableHighlight onPress={() => changePage('TeamAdd')}>
                     <View style={styles.footerItem}>
-                        <Image style={styles.icon} source={require('../assets/plus.png')} />
+                        <Image style={styles.icon} source={require('../assets/warning-sign.png')} />
                     </View>
                 </TouchableHighlight>
 
 
-                <TouchableHighlight onPress={() => changePage('ProfilePage')}>
+                <TouchableHighlight onPress={() => changePage('MembersPage')}>
                     <View style={styles.footerItem}>
-                        <Image style={styles.icon} source={require('../assets/user.png')} />
+                        <Image style={styles.icon} source={require('../assets/group.png')} />
                     </View>
                 </TouchableHighlight>
 
@@ -107,8 +72,12 @@ export default ProfilePage = props => {
     title: {
       margin: 20,
       color: "#fff",
-      fontSize: 20,
+      fontSize: 25,
       fontWeight: 'bold',
+    },
+
+    createOptionContainer: {
+        flexDirection: 'row',
     },
 
     listContainer: {

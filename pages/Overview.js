@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight, TouchableOpacity} from 'react-native';
+import supabase from '../supabase'
 
+export default Overview = props => {
+    const userId = props.userId;
+    const [currentPage, setCurrentPage] = props.function;
+    const [projectId, setProjectID] = props.projFunc;
+    const [teamId, setTeamID] = props.teamFunc;
 
-export default function Overview() {
-    let projectList = [
-        {name: 'wake up', size: 10},
-        {name: 'shower', size: 10},
-        {name: 'sleep', size: 10}
-    ]
+    const [projectList, setProjectList] = React.useState([])
+    useEffect(() => {
+        const fetchProjects = async () => {
+            let { data: projects, error } = await supabase
+            .from('projects')
+            .select()
+            .eq('user_id', userId)
+            
+            if (projects) setProjectList(projects)
+        }
+        fetchProjects()
+    }, [])
 
-    let projects = []
+    let projectsDisplay = []
     for (let i=0; i<projectList.length; i++){
-        projects.push(
-            <TouchableOpacity onPress={goToProject}>
+        projectsDisplay.push(
+            <TouchableOpacity key={projectList[i].id} onPress={() => goToProject(projectList[i].id)}>
                 <View style={styles.item}>
                     <Text style={styles.itemText}>
                         {projectList[i].name}
@@ -23,24 +35,30 @@ export default function Overview() {
     }
 
     
-    let teamList = [
-        {name: 'teamA', urgency: 'urgent'},
-        {name: 'teamB', urgency: 'not urgent'},
-        {name: 'teamC', urgency: 'very urgent'},
-        {name: 'teamB', urgency: 'not urgent'},
-        {name: 'teamB', urgency: 'not urgent'},
-        {name: 'teamB', urgency: 'not urgent'},
-        {name: 'teamB', urgency: 'not urgent'},
-        {name: 'teamB', urgency: 'not urgent'},
-        {name: 'teamB', urgency: 'not urgent'},
-        {name: 'teamB', urgency: 'not urgent'},
-        {name: 'teamB', urgency: 'not urgent'},
-    ]
+    const [teamList, setTeamList] = React.useState([])
+    useEffect(() => {
+        const fetchTeams = async () => {
 
-    let teams = []
+            let { data: teams, error } = await supabase
+            .from('teams')
+            .select(`
+                *,
+                team_users!inner (
+                    user_id
+                )
+            `)
+            .eq('team_users.user_id', userId)
+            
+            if (teams) setTeamList(teams)
+        }
+        fetchTeams()
+    }, [])
+
+
+    let teamsDisplay = []
     for (let i=0; i<teamList.length; i++){
-        teams.push(
-            <TouchableOpacity onPress={goToTeam}>
+        teamsDisplay.push(
+            <TouchableOpacity key={teamList[i].id}  onPress={() => goToTeam(teamList[i].id)}>
                 <View style={styles.item}>
                     <Text style={styles.itemText}>
                         {teamList[i].name}
@@ -50,16 +68,19 @@ export default function Overview() {
         );
     }
 
-    const goToProject = () => {
-
+    const goToProject = (e) => {
+        setProjectID(e)
+        changePage('ProjectPage')
     }
     
-    const goToTeam = () => {
+    const goToTeam = (e) => {
+        setTeamID(e)
+        changePage('TeamPage')
 
     }
 
-    const changePage = () => {
-
+    const changePage = (e) => {
+        setCurrentPage(e)
     }
 
 
@@ -70,7 +91,7 @@ export default function Overview() {
                     <View style={styles.listContainer}>
                         <Text style={styles.title}>Projects</Text>
                         <View style={styles.itemContainer}>
-                            {projects}
+                            {projectsDisplay}
                         </View>
                     </View>
 
@@ -78,7 +99,7 @@ export default function Overview() {
                     <View style={styles.listContainer}>
                         <Text style={styles.title}>Teams</Text>
                         <View style={styles.itemContainer}>
-                            {teams}
+                            {teamsDisplay}
                         </View>
                     </View>
                 </View>
@@ -89,21 +110,21 @@ export default function Overview() {
             {/* footer */}
             <View style={styles.footer}>
 
-                <TouchableHighlight onPress={changePage}>
+                <TouchableHighlight onPress={() => changePage('Overview')}>
                     <View style={styles.footerItem}>
                         <Image style={styles.icon} source={require('../assets/list.png')} />
                     </View>
                 </TouchableHighlight>
 
 
-                <TouchableHighlight onPress={changePage}>
+                <TouchableHighlight onPress={() => changePage('PersonalAdd')}>
                     <View style={styles.footerItem}>
                         <Image style={styles.icon} source={require('../assets/plus.png')} />
                     </View>
                 </TouchableHighlight>
 
 
-                <TouchableHighlight onPress={changePage}>
+                <TouchableHighlight onPress={() => changePage('ProfilePage')}>
                     <View style={styles.footerItem}>
                         <Image style={styles.icon} source={require('../assets/user.png')} />
                     </View>

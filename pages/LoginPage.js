@@ -1,19 +1,44 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { Button, StyleSheet, Text, View, SafeAreaView, TextInput } from 'react-native';
-import { supabase } from '../supabase';
+import supabase from '../supabase'
 
-export default function LoginPage() {
+export default LoginPage = props => {
+  const [currentPage, setCurrentPage] = props.function;
+  const [userId, setUserID] = props.userFunc;
+
   const [email, onChangeEmail] = React.useState('');
   const [pwd, onChangePwd] = React.useState('');
   const [fail, setFail] = React.useState(false);
-  const login = () => {
-    setFail(false);
-    if (email === '') setFail(true);
-    if (pwd === '') setFail(true);
 
-    if (!fail){
-        
+  const [foundUser, setFoundUser] = React.useState(null);
+
+  const login = async () => {
+    setFail(false);
+    let valid = true;
+    if (email === '' || pwd === '') valid = false;
+
+    let { data: users, error } = await supabase
+    .from('users')
+    .select()
+    .eq('email', email)
+    .eq('password', pwd)
+    
+    if (!users.length) valid = false;
+
+    if (valid){
+        setUserID(users[0].id)
+        props.setIsLogginIn()
+        setCurrentPage('Overview')
+    }
+    else{
+      setFail(true)
+    }
+  }
+
+  const goToRegister = () => {
+    if (currentPage === 'LoginPage'){
+      setCurrentPage('RegisterPage');
     }
   }
 
@@ -47,6 +72,7 @@ export default function LoginPage() {
         />
 
         <Button
+          onPress={goToRegister}
           style={styles.button}
           title='Register'
         />

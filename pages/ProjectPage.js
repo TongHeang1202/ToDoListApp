@@ -1,35 +1,78 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight, TouchableOpacity} from 'react-native';
+import supabase from '../supabase'
+
+export default ProjectPage = props => {
+    const project_id = props.projectId
+    const team_id = props.teamId
+    const [currentPage, setCurrentPage] = props.function;
+
+    const [project, setProject] = React.useState([])
+    const [projectSuccess, setProjectSuccess] = React.useState(null)
+    
+    const [taskList, setTaskList] = React.useState([])
+    const [taskSuccess, setTaskSuccess] = React.useState(null)
+    useEffect(() => {
+        const fetchData = async () => {
+            let { data: projects, errorProj } = await supabase
+            .from('projects')
+            .select()
+            .eq('id', project_id)
+            
+            if (projects){
+                setProject(projects)
+                setProjectSuccess(true)
+            } 
+            
+
+            let { data: tasks, errorTask } = await supabase
+            .from('tasks')
+            .select(`
+                *,
+                projects!inner(
+                    id
+                )
+            `)
+            .eq('projects.id', project_id)
+            
+            if (tasks){
+                setTaskList(tasks)
+                setTaskSuccess(true)
+            } 
 
 
-export default function ProjectPage({projectId}) {
-    const [addTaskName, onChangeAddTaskName] = React.useState('')
+        }
+        fetchData()
+    }, [])
+    
+    let displayProjectName = ''
+    if (projectSuccess){
+        displayProjectName = project[0].name;
+    }
+
     const projectName = 'Homework'
-
-    const taskList = [
-        {id: 1, desc: 'do hw#4', urgency: 'very urgent', projectId: 1, team_id: 1, status: false},
-        {id: 1, desc: 'do hw#4', urgency: 'very urgent', projectId: 1, team_id: 1, status: true},
-        {id: 1, desc: 'do hw#4', urgency: 'very urgent', projectId: 1, team_id: 1, status: false},
-        {id: 1, desc: 'do hw#4', urgency: 'very urgent', projectId: 1, team_id: 1, status: false},
-        {id: 1, desc: 'do hw#4', urgency: 'very urgent', projectId: 1, team_id: 1, status: false},
-        {id: 1, desc: 'do hw#4', urgency: 'very urgent', projectId: 1, team_id: 1, status: true},
-    ]
     
     let tasksIncomplete = []
     let tasksComplete = []
     for (let i=0; i<taskList.length; i++){
         if (!taskList[i].status){
             tasksIncomplete.push(
-                <View style={styles.item}>
+                <View key={taskList[i].id} style={styles.item}>
                     <Text style={styles.itemText}>
                         {taskList[i].desc}
                     </Text>
+
+                    <TouchableHighlight  style={styles.check} onPress={() => completeTask(taskList[i].id)}>
+                        <View style={styles.check}>
+                            <Text>Complete</Text>
+                        </View>
+                    </TouchableHighlight>
                 </View>
             );
         }
         else{
             tasksComplete.push(
-                <View style={styles.item}>
+                <View key={taskList[i].id} style={styles.item}>
                     <Text style={styles.itemText}>
                         {taskList[i].desc}
                     </Text>
@@ -38,21 +81,66 @@ export default function ProjectPage({projectId}) {
         }
     }
 
-    const addTask = () => {
+    
+    const [addTaskName, onChangeAddTaskName] = React.useState('')
+    const [taskNameError, onChangeTaskNameError] = React.useState('')
+    const addTask = async () => {
+        let valid = true;
+        if (addTaskName === ''){
+            valid = false;
+            onChangeTaskNameError('Enter a task Name')
+        } 
 
+        if (valid){
+            let teamInsert = team_id
+            if (team_id === -1) teamInsert = 1
+
+            const { data, error } = await supabase
+            .from('tasks')
+            .insert([
+            { desc: addTaskName, project_id: project_id, team_id: teamInsert, status: false}
+            ])
+            .select()
+
+            if (error) throw error;
+            onChangeAddTaskName('')
+            onChangeTaskNameError('')
+        }
     }   
+
+    completeTask = async (id) => {
+        const { data, error } = await supabase
+        .from('tasks')
+        .update({ status: true })
+        .eq('id', id)
+        .select()
+
+    }
+    
+    const goBack = () => {
+        if (team_id === -1) setCurrentPage('Overview')
+        else setCurrentPage('TeamPage')
+    }
 
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
-                <Text style={styles.title}>{projectName}</Text>
+
+                <TouchableHighlight style={styles.buttonContainer} onPress={() => goBack()}>
+                    <View>
+                        <Text style={styles.buttonText}>Go Back</Text>
+                    </View>
+                </TouchableHighlight>
+
+                <Text style={styles.title}>{displayProjectName}</Text>
 
                 <TextInput 
-                    onChange={onChangeAddTaskName}
+                    onChangeText={onChangeAddTaskName}
                     style={styles.input}
                     placeholder='Task Name'
                     value={addTaskName}
                 />
+                <Text style={styles.error}>{taskNameError}</Text>
                 <TouchableOpacity style={styles.buttonContainer} onPress={addTask}>
                     <View >
                         <Text style={styles.buttonText}>Add Task</Text>
@@ -91,7 +179,7 @@ const styles = StyleSheet.create({
     title: {
       margin: 20,
       color: "#fff",
-      fontSize: 40,
+      fontSize: 30,
       fontWeight: 'bold',
     },
 
@@ -108,9 +196,11 @@ const styles = StyleSheet.create({
     },
 
     item: {
+        flexDirection: 'row',
         margin: 10,
         height: 50,
-        justifyContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         color: 'white',
         fontSize: 25,
     },
@@ -118,6 +208,15 @@ const styles = StyleSheet.create({
     itemText: {
         color: 'white',
         fontSize: 25,
+    },
+
+    check: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 80,
+        height: 40,
+        backgroundColor: '#999',
+        borderRadius: 5,
     },
   
     input: {
@@ -133,11 +232,10 @@ const styles = StyleSheet.create({
     },
   
     buttonContainer: {
-        width: 150,
-        height: 30,
+        width: 120,
+        height: 40,
         margin: 12,
-        padding: 20,
-      backgroundColor: '#fff',
+      backgroundColor: '#444',
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: 10,
@@ -145,6 +243,7 @@ const styles = StyleSheet.create({
   
     buttonText: {
       fontSize: 20,
+      color: 'white',
     },
 
     icon: {
@@ -172,4 +271,8 @@ const styles = StyleSheet.create({
         width: 130,
         height: 70,
     },
+    error: {
+        fontSize: 20,
+        color: 'tomato'
+    },  
   });

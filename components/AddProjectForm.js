@@ -1,21 +1,42 @@
 import React from 'react';
 import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight, TouchableOpacity} from 'react-native';
+import supabase from '../supabase'
 
+export default AddProjectForm = props => {
+    const userId = props.userId
+    const teamId = props.teamId
 
-export default function AddProjectForm() {
-    const [projName, onChangeProjName] = React.useState('');
+    const [projName, onChangeProject] = React.useState('');
+    const [projNameError, setProjNameError] = React.useState(null);
+    
+    const addProject = async () => {
+        let valid = true;
+        if (projName === '') valid = false;
 
-    const addProject = () => {
+        if (valid) {
+            let teamInsert = teamId, userInsert = userId;
+            if (teamId === -1) teamInsert = 1
+            else userInsert = 1
+            
+            const { data, error } = await supabase
+            .from('projects')
+            .insert([
+            { name: projName, team_id: teamInsert, user_id: userInsert}
+            ])
+            .select()
 
+            if (error) throw error;
+            onChangeProject('')
+        }
     }
 
     return (
         <SafeAreaView style={styles.container}>
             <TextInput 
-                onChange={onChangeProjName}
                 style={styles.input}
+                onChangeText={onChangeProject}
+                value={projName}
                 placeholder='Project Name'
-                value = {projName}
             />
             
             <TouchableOpacity onPress={addProject}>
@@ -123,4 +144,8 @@ export default function AddProjectForm() {
         height: 70,
         backgroundColor: 'white',
     },
+    error: {
+        fontSize: 20,
+        color: 'tomato'
+    },  
   });

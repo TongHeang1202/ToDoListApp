@@ -1,18 +1,46 @@
 import React from 'react';
 import { Button, StyleSheet, Text, View, SafeAreaView, TextInput , Image, ScrollView, TouchableHighlight, TouchableOpacity} from 'react-native';
+import supabase from '../supabase'
 
-
-export default function AddTeamForm() {
+export default AddTeamForm = props => {
+    const userId = props.userId
+    
     const [teamName, onChangeteamName] = React.useState('');
+    const addTeam = async () => {
+        let valid = true;
+        if (teamName === '') valid = false;
 
-    const addTeam = () => {
+        if (valid) {
+            
+            const { data, errorTeam } = await supabase
+            .from('teams')
+            .insert([
+            { name: teamName, size: 1}
+            ])
+            .select()
 
+            if (errorTeam) throw error;
+            if (data) {
+                const { member, errormember } = await supabase
+                .from('team_users')
+                .insert([
+                { team_id: data[0].id, user_id: userId, is_manager: true}
+                ])
+                .select()
+
+                if (errormember) throw error;
+
+            }
+            
+
+            onChangeteamName('')
+        }
     }
 
     return (
         <SafeAreaView style={styles.container}>
             <TextInput 
-                onChange={onChangeteamName}
+                onChangeText={onChangeteamName}
                 style={styles.input}
                 placeholder='Team Name'
                 value = {teamName}
@@ -123,4 +151,8 @@ export default function AddTeamForm() {
         height: 70,
         backgroundColor: 'white',
     },
+    error: {
+        fontSize: 20,
+        color: 'tomato'
+    },  
   });

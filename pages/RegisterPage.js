@@ -1,9 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Button, StyleSheet, Text, View, SafeAreaView, TextInput } from 'react-native';
+import { Button, StyleSheet, Text, View, SafeAreaView, TextInput, TouchableHighlight } from 'react-native';
+import supabase from '../supabase'
 
-
-export default function RegisterPage() {
+export default function RegisterPage({currentPage, setCurrentPage}) {
     const [fname, onChangeFname] = React.useState('');
     const [lname, onChangeLname] = React.useState('');
     const [email, onChangeEmail] = React.useState('');
@@ -17,22 +17,52 @@ export default function RegisterPage() {
     let [pwdValid, setPwdValid]  = React.useState(true);
 
 
-    const handleRegister = () => {
-        fname === '' ? setFnameValid(false) : setFnameValid(true);
-        lname === '' ? setLnameValid(false) : setLnameValid(true);
-        email === '' ? setEmailValid(false) : setEmailValid(true);
-        phone === '' ? setPhoneValid(false) : setPhoneValid(true);
-        pwd.length < 8 ? setPwdValid(false) : setPwdValid(true);
+    const handleRegister = async () => {
+        let allValid = true;
+        setFnameValid(true)
+        setLnameValid(false)
+        setEmailValid(false)
+        setPhoneValid(false)
+        setPwdValid(false)
 
-        let allValid = fnameValid && lnameValid && emailValid && phoneValid && pwdValid;
+        if (fname === ''){
+            allValid = false;
+            setFnameValid(false)
+        }
+        if (lname === ''){
+            allValid = false;
+            setLnameValid(false)
+        }
+        if (email === ''){
+            allValid = false;
+            setEmailValid(false)
+        }
+        if (phone === ''){
+            allValid = false;
+            setPhoneValid(false)
+        }
+        if (pwd === ''){
+            allValid = false;
+            setPwdValid(false)
+        }
+
         if (allValid){
+            const { data, error } = await supabase
+              .from('users')
+              .insert([
+                { first_name: fname, last_name: lname, email: email, phone: phone, password: pwd },
+              ])
+              .select()
             
+            setCurrentPage()
         }
     }
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Register</Text>
+            <View>
+                <Text style={styles.title}>Register</Text>
+            </View>
 
             <View style={styles.inputContainer}>
                 <View style={styles.nameContainer}>
@@ -79,7 +109,14 @@ export default function RegisterPage() {
                     style={styles.button}
                     title='Register'
                 />
+
             </View>
+
+            <TouchableHighlight style={styles.buttonContainer} onPress={setCurrentPage}>
+                <View>
+                    <Text style={styles.buttonText}>Back To Login</Text>
+                </View>
+            </TouchableHighlight>
         </SafeAreaView>
     );
 }
@@ -114,7 +151,8 @@ const styles = StyleSheet.create({
     },
     
     input: (valid) =>{
-        const bgColor = valid ? 'white' : '#FF7777';
+        let bgColor = 'white'
+        if (!valid) bgColor = 'tomato'
     return {
         height: 60,
         margin: 10,
@@ -129,12 +167,27 @@ const styles = StyleSheet.create({
     },
 
     buttonContainer: {
-        width: 300,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-      },
-    
+        width: 200,
+        height: 40,
+        margin: 12,
+        padding: 10,
+      backgroundColor: 'white',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 10,
+    },
+  
+    buttonText: {
+      fontSize: 20,
+      color: '#222',
+    },
     button: {
         color: 'white',
+    },
+
+    icon: {
+        backgroundColor: 'red',
+        width: 50,
+        height: 50,
     },
 })
